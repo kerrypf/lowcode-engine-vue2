@@ -104,7 +104,6 @@ export const Renderer = defineComponent({
     const { documentInstance, simulator } = this;
     const { schema, scope, messages, appHelper, key } = documentInstance;
     const { designMode, device, locale, components, requestHandlersMap } = simulator;
-    console.log(this, 'this', schema.id!);
     return h(LowCodeRenderer, {
       ref: 'renderer',
       key: key,

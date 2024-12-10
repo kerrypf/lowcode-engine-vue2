@@ -61,7 +61,6 @@ Object.assign(window, { VueRouter });
 const loader = new AssetLoader();
 
 const builtinComponents = { Slot, Leaf, Page };
-console.log(builtinComponents, 'builtinComponents');
 
 export interface ProjectContext {
   i18n: Record<string, object>;
@@ -115,13 +114,11 @@ function createDocumentInstance(
   };
 
   const mountInstance = (id: string, instanceOrEl: ComponentInstance | HTMLElement) => {
-    console.log('mountInstance');
     const docId = document.id;
     if (instanceOrEl == null) {
       let instances = instancesMap.get(id);
       if (instances) {
         instances = instances.filter(checkInstanceMounted);
-        console.log(instances.length, 'instances.length');
         if (instances.length > 0) {
           instancesMap.set(id, instances);
           setHostInstance(docId, id, instances);
@@ -177,7 +174,6 @@ function createDocumentInstance(
       instances = [instance];
     }
     vueInstanceMap.set(instance.$.uid, instance);
-    console.log(instances, 'instances instancesMap.set');
     instancesMap.set(id, instances);
     setHostInstance(docId, id, instances);
   };
@@ -315,7 +311,6 @@ function createSimulatorRenderer() {
    * 创建组件实例
    * createApp(SimulatorRendererView, { simulator })
    */
-  console.log(simulator, 'simulator');
   const simulatorApp = new Vue({
     router,
     render: (h) => h(SimulatorRendererView, { props: { simulator } }),
@@ -462,7 +457,6 @@ function createSimulatorRenderer() {
         } else if (router.hasRoute(documentInstance.id)) {
           router.removeRoute(documentInstance.id);
         }
-        console.log(documentInstance, 'documentInstance', simulator);
         router.addRoute({
           name: documentInstance.id,
           path: documentInstance.path,

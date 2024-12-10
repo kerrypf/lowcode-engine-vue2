@@ -210,7 +210,6 @@ export function useLeaf(
   onChildShowChange: (schema: NodeSchema, show: boolean) => void = () => void 0,
 ) {
   const renderContext = useRendererContext();
-  console.log(leafProps, 'leafProps');
   const { getNode, wrapLeafComp, designMode, thisRequiredInJSE } = renderContext;
   const parser = new SchemaParser({
     thisRequired: thisRequiredInJSE,
@@ -242,7 +241,6 @@ export function useLeaf(
     comp?: Component | typeof Fragment,
   ): VNode | VNode[] | null => {
     // 若 schema 不为 NodeSchema，则直接渲染
-    console.log(schema, 'schema');
     if (isString(schema)) {
       return createTextVNode(schema);
     } else if (isNil(schema)) {
@@ -302,7 +300,6 @@ export function useLeaf(
     if (!loop) {
       const props = buildProps(rawProps, scope, node, null, { ref });
       const [vnodeProps, compProps] = splitProps(props);
-      console.log(compProps, 'attrs', splitProps(props));
       return h(
         base,
         {
@@ -353,7 +350,6 @@ export function useLeaf(
    * @param comp - 节点渲染的组件，若不传入，则根据节点的 componentName 推断
    */
   const renderHoc: RenderComponent = (nodeSchema, blockScope, comp) => {
-    console.log(comp, 'renderHoc-comp');
     const vnode = render(nodeSchema, Hoc, blockScope, comp);
     if (isNodeSchema(nodeSchema) && isVNode(vnode)) {
       if (vnode.type === Comment) {
@@ -362,7 +358,6 @@ export function useLeaf(
         onChildShowChange(nodeSchema, true);
       }
     }
-    console.log(vnode, 'buildSlots:renderHoc');
     return vnode;
   };
 
@@ -379,7 +374,6 @@ export function useLeaf(
   /**
    * 渲染组件
    */
-  console.log(isDesignMode, 'isDesignMode');
   const renderComp: RenderComponent = isDesignMode ? renderHoc : renderLive;
 
   /**
@@ -396,7 +390,6 @@ export function useLeaf(
       (prev, next) => {
         let slotSchema = slots[next];
         const isDefaultSlot = next === 'default';
-        console.log(slotSchema, 'buildSlots:slotSchema');
 
         // 插槽数据为 null 或 undefined 时不渲染插槽
         if (isNil(slotSchema) && !isDefaultSlot) return prev;
@@ -414,7 +407,6 @@ export function useLeaf(
         if (isArray(slotSchema) && slotSchema.length === 0) {
           slotSchema = slotSchema[0];
         }
-        console.log(isSlotSchema(slotSchema), 'buildSlots:isSlotSchema(slotSchema)');
         if (isArray(slotSchema)) {
           // 插槽为数组，则当前插槽不可拖拽编辑，直接渲染插槽内容
           renderSlot = keepParam(slotSchema, (schema) => () => {
@@ -430,17 +422,12 @@ export function useLeaf(
             );
             return ensureArray(vnode);
           });
-          console.log(renderSlot, 'buildSlots:renderSlot');
         } else {
           renderSlot = keepParam(
             slotSchema as NodeData,
             (schema) => () => ensureArray(renderComp(schema, scope)),
           );
         }
-        console.log(
-          isDefaultSlot && isDesignMode && node?.isContainerNode,
-          'buildSlots:retrun',
-        );
         prev[next] =
           isDefaultSlot && isDesignMode && node?.isContainerNode
             ? decorateDefaultSlot(renderSlot, locked) // 当节点为容器节点，且为设计模式下，则装饰默认插槽
@@ -660,11 +647,6 @@ export function useLeaf(
           : !!parser.parseSchema(condition, scope),
     };
   };
-  console.log(
-    leafProps.__isRootNode,
-    useIsRootNode(leafProps.__isRootNode),
-    ' leafProps.__isRootNode',
-  );
   return {
     node,
     locked,
@@ -688,7 +670,6 @@ export function useRenderer(rendererProps: RendererProps, scope: RuntimeScope) {
   };
 
   const designModeRef = computed(() => rendererProps.__designMode ?? 'live');
-  console.log(rendererProps.__components, 'rendererProps.__components');
   const componentsRef = computed(() => rendererProps.__components);
 
   return { scope, schemaRef, designModeRef, componentsRef, ...useLeaf(leafProps) };
@@ -720,7 +701,6 @@ export function useRootScope(rendererProps: RendererProps, setupConext: object) 
   };
 
   const callHook = createHookCaller(schema, scope, parser);
-  console.log(callHook, 'useRootScope-callHook');
   callHook('initEmits');
   callHook('beforeCreate');
 
@@ -729,7 +709,6 @@ export function useRootScope(rendererProps: RendererProps, setupConext: object) 
   if (propsSchema) {
     const props = parser.parseOnlyJsValue<object>(propsSchema);
     addToScope(scope, AccessTypes.PROPS, props);
-    console.log(AccessTypes.PROPS, props, 'useRootScope:props-scope');
   }
 
   const setupResult = callHook('setup', scope._props, setupConext);
@@ -739,16 +718,13 @@ export function useRootScope(rendererProps: RendererProps, setupConext: object) 
   // 处理 methods
   if (methodsSchema) {
     const methods = parser.parseSchema(methodsSchema, scope);
-    console.log(methods, 'useRootScope:methods');
     methods && addToScope(scope, AccessTypes.CONTEXT, methods);
-    console.log(AccessTypes.CONTEXT, methods, 'useRootScope-addToScope-methods');
   }
 
   // 处理 state
   callHook('initData');
   if (stateSchema) {
     const states = parser.parseSchema<object>(stateSchema);
-    console.log(states, 'useRootScope:states/data', scope.$set);
 
     states && addToScope(scope, AccessTypes.DATA, states);
   }
@@ -759,14 +735,11 @@ export function useRootScope(rendererProps: RendererProps, setupConext: object) 
 
   // 处理 lifecycle
   const lifeCycles = parser.parseSchema(pickLifeCycles(lifeCyclesSchema), scope);
-  console.log(lifeCycles, 'lifeCycles');
   if (Object.keys(lifeCycles).length > 0) {
     Object.keys(lifeCycles).forEach((lifeCycle) => {
       if (isLifecycleKey(lifeCycle)) {
         const callback = lifeCycles[lifeCycle];
         if (isFunction(callback)) {
-          console.log(LIFT_CYCLES_MAP[lifeCycle], 'LIFT_CYCLES_MAP[lifeCycle]');
-          console.log(LIFT_CYCLES_MAP, lifeCycle, 'LIFT_CYCLES_MAP');
           // LIFT_CYCLES_MAP[lifeCycle](callback, instance); //TODO
         }
       }
@@ -781,9 +754,7 @@ export function useRootScope(rendererProps: RendererProps, setupConext: object) 
     const { __locale: locale, __messages: messages } = rendererProps;
     return getI18n(key, values, locale, messages);
   };
-  console.log({ i18n, $t: i18n });
   const currentLocale = computed(() => rendererProps.__locale);
-  console.log(currentLocale, 'currentLocale');
   addToScope(scope, AccessTypes.CONTEXT, { i18n, $t: i18n });
   addToScope(scope, AccessTypes.DATA, { currentLocale });
 
@@ -798,13 +769,11 @@ export function useRootScope(rendererProps: RendererProps, setupConext: object) 
     .filter((key) => !(key in scope))
     .map((key) => [key, ref()]);
   addToScope(scope, AccessTypes.CONTEXT, { dataSource, dataSourceMap, reloadDataSource });
-  console.log(dataSourceData, fromPairs(dataSourceData), 'fromPairs(dataSourceData)');
   addToScope(scope, AccessTypes.SETUP, fromPairs(dataSourceData));
 
   // 处理 renderer 额外传入的 scope
   if (extraScope) {
     addToScope(scope, AccessTypes.SETUP, extraScope);
-    console.log(extraScope, 'extraScope');
   }
 
   callHook('created');
@@ -1033,7 +1002,6 @@ const processProp = (target: Record<string, unknown>, key: string, val: unknown)
  * @param slot - 插槽渲染函数
  */
 const decorateDefaultSlot = (slot: Slot, locked: Ref<boolean>): Slot => {
-  console.log(slot, locked, 'buildSlots:decorateDefaultSlot ');
   return (...args: unknown[]) => {
     const vnodes = slot(...args).filter(Boolean);
     if (!vnodes.length) {

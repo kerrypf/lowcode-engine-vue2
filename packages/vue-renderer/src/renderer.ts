@@ -92,7 +92,6 @@ const VueRenderer = defineComponent({
     const parser = new SchemaParser({
       thisRequired: props.thisRequiredInJSE,
     }).initModule(props.schema);
-    console.log(props, 'VueRenderer-props');
     const triggerCompGetCtx = (schema: NodeSchema, val: ComponentPublicInstance) => {
       val && props.onCompGetCtx?.(schema, val);
     };
@@ -173,7 +172,6 @@ const VueRenderer = defineComponent({
 
     const renderContent = () => {
       const { components } = rendererContext;
-      console.log(components, 'renderContent-components');
       const {
         scope,
         locale,
@@ -193,7 +191,6 @@ const VueRenderer = defineComponent({
       if (Comp && !(Comp as any).__renderer__) {
         Comp = RENDERER_COMPS[`${componentName}Renderer`];
       }
-      console.log(props, 'render-props', Comp);
       return Comp
         ? h(
             Comp,
@@ -227,7 +224,6 @@ const VueRenderer = defineComponent({
     return () => {
       const { device, locale } = props;
       const configProvider = config.getConfigProvider();
-      console.log(configProvider, 'configProvider');
       return configProvider
         ? h(configProvider, { props: { device, locale } }, { default: renderContent })
         : renderContent();

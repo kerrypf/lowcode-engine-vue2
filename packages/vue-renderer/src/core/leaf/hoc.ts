@@ -121,7 +121,6 @@ export const Hoc = defineComponent({
       );
       onUnmounted(
         node.onVisibleChange((visible: boolean) => {
-          console.log(isRootNode, 'onUnmounted:isRootNode');
           isRootNode
             ? // 当前节点为根节点（Page），直接隐藏
               (showNode.value = visible)
@@ -147,25 +146,10 @@ export const Hoc = defineComponent({
       const builtSlots = slotSchema.value
         ? buildSlots(slotSchema.value, scope, node)
         : slots;
-      console.log(builtSlots, 'buildSlots');
       return comp
         ? isFragment(comp)
           ? h(Fragment, builtSlots.default?.())
-          : h(comp, mergeProps(compProps, vnodeProps), builtSlots)
-        : h('div', 'component not found');
-      return comp
-        ? isFragment(comp)
-          ? h(Fragment, builtSlots.default?.())
-          : h(comp, mergeProps(compProps, vnodeProps), [
-              () => h('div', {}, [() => 'test']),
-            ])
-        : h('div', 'component not found');
-      return comp
-        ? isFragment(comp)
-          ? h(Fragment, builtSlots.default?.())
-          : h(comp, mergeProps(compProps, vnodeProps), {
-              default: () => [h('div', {}, [() => 'test'])],
-            })
+          : h(comp, { props: mergeProps(compProps, vnodeProps) }, builtSlots)
         : h('div', 'component not found');
     };
   },

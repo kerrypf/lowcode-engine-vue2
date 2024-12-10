@@ -3,7 +3,6 @@ import { defineComponent } from 'vue';
 import { h } from '@formily/vue';
 const Page = defineComponent({
   setup(props, { slots }) {
-    console.log(props, slots, 'buildSlots:page-build');
     return () => h('div', { class: 'lc-page', props }, slots);
   },
 });

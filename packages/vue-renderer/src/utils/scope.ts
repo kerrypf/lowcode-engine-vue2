@@ -48,18 +48,6 @@ export function getAccessTarget(
 ): Record<string, unknown> {
   switch (accessType) {
     case AccessTypes.SETUP:
-      console.log(
-        proxyRefs(
-          Object.create(null, {
-            __lcSetup: {
-              get: () => true,
-              enumerable: false,
-              configurable: false,
-            },
-          }),
-        ),
-        'proxyRefs',
-      );
       return scope.$.setupState.__lcSetup
         ? scope.$.setupState
         : (scope.$.setupState = proxyRefs(
@@ -90,7 +78,6 @@ export function addToScope(
 ): void {
   const instance = scope;
   const target = getAccessTarget(scope, accessType);
-  console.log(target, 'addToScope', accessType);
   if (useDefineProperty) {
     const descriptors = Object.getOwnPropertyDescriptors(source);
     for (const key in descriptors) {

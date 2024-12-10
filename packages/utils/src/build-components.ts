@@ -110,6 +110,5 @@ export function buildComponents(
       }
     }
   });
-  console.log(components, 'components');
   return components;
 }
