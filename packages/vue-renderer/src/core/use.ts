@@ -1,4 +1,4 @@
-//@ts-nocheck
+//@ts-ignore
 import {
   type Component,
   type VNode,
@@ -56,7 +56,6 @@ import {
   type RuntimeScope,
   type Slot,
   type Slots,
-  type VNodeChild,
   SchemaParser,
   warnOnce,
   warn,
@@ -240,6 +239,9 @@ export function useLeaf(
     scope: RuntimeScope,
     comp?: Component | typeof Fragment,
   ): VNode | VNode[] | null => {
+    // delete base._Ctor;
+
+    console.log(base, 'base111');
     // 若 schema 不为 NodeSchema，则直接渲染
     if (isString(schema)) {
       return createTextVNode(schema);
@@ -297,9 +299,12 @@ export function useLeaf(
 
     const { props: rawProps, slots: rawSlots } = buildSchema(schema);
     const { loop, buildLoopScope } = buildLoop(schema, scope);
+    console.log(rawProps, '-props-:rawProps');
     if (!loop) {
       const props = buildProps(rawProps, scope, node, null, { ref });
+      console.log(props, '-props-:buildProps');
       const [vnodeProps, compProps] = splitProps(props);
+      console.log(vnodeProps, compProps, '-props-:splitProps');
       return h(
         base,
         {
@@ -326,6 +331,7 @@ export function useLeaf(
       const props = buildProps(rawProps, scope, node, blockScope, { ref });
       const [vnodeProps, compProps] = splitProps(props);
       const mergedScope = mergeScope(scope, blockScope);
+      console.log('debouncedRerender-base-loop');
       return h(
         base,
         {
@@ -335,8 +341,8 @@ export function useLeaf(
             __scope: mergedScope,
             __schema: schema,
             __vnodeProps: vnodeProps,
-            ...compProps,
           },
+          ...compProps,
         },
         buildSlots(rawSlots, mergedScope, node),
       );
@@ -350,6 +356,7 @@ export function useLeaf(
    * @param comp - 节点渲染的组件，若不传入，则根据节点的 componentName 推断
    */
   const renderHoc: RenderComponent = (nodeSchema, blockScope, comp) => {
+    console.log('debouncedRerender-nodeSchema');
     const vnode = render(nodeSchema, Hoc, blockScope, comp);
     if (isNodeSchema(nodeSchema) && isVNode(vnode)) {
       if (vnode.type === Comment) {
@@ -693,6 +700,7 @@ export function useRootScope(rendererProps: RendererProps, setupConext: object) 
 
   // 将全局属性配置应用到 scope 中
   const instance = getCurrentInstance()!;
+  console.log(instance, 'getCurrentInstance');
   const scope = instance.proxy as RuntimeScope;
   scope.accessCache = {};
   scope.$ = {
@@ -785,6 +793,12 @@ export function useRootScope(rendererProps: RendererProps, setupConext: object) 
     return promises.length > 0 ? Promise.all(promises).then(() => true) : true;
     // return promises.length > 0 ? Promise.all(promises).then(() => render) : render;
   };
+  // const wrapRender = (render: () => VNodeChild | null) => {
+  //   const promises: Promise<unknown>[] = [];
+  //   isPromise(setupResult) && promises.push(setupResult);
+  //   shouldInit() && promises.push(reloadDataSource());
+  //   return promises.length > 0 ? Promise.all(promises).then(() => render) : render;
+  // };
 
   // 初始化 loop ref states
   addToScope(scope, AccessTypes.CONTEXT, {

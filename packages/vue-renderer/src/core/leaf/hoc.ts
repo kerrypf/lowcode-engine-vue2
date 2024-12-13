@@ -3,7 +3,7 @@ import { shallowRef, type InjectionKey, inject, provide, watch, toRaw } from 'vu
 import { h } from '@formily/vue';
 // import { Fragment } from 'vue-frag';
 // import { mergeProps } from '../../utils/mergeProps';
-import { Fragment, mergeProps } from '../../utils/vue-runtime-core';
+import { Fragment } from '../../utils/vue-runtime-core';
 
 import { onUnmounted, defineComponent } from 'vue';
 import { leafProps } from '../base';
@@ -22,8 +22,10 @@ const HOC_NODE_KEY: InjectionKey<{ rerenderSlots: () => void }> = Symbol('hocNod
 const useHocNode = (rerenderSlots: () => void) => {
   const { rerender } = useRendererContext();
   const parentNode = inject(HOC_NODE_KEY, null);
+  console.log(parentNode, 'parentNode');
 
   const debouncedRerender = debounce(rerenderSlots);
+  console.log(debouncedRerender, 'debouncedRerender');
 
   provide(HOC_NODE_KEY, {
     rerenderSlots: debouncedRerender,
@@ -49,6 +51,7 @@ export const Hoc = defineComponent({
   inheritAttrs: false,
   props: leafProps,
   setup(props, { slots, attrs }) {
+    console.log('debouncedRerender-Hoc');
     const showNode = shallowRef(true);
     const nodeSchema = shallowRef(props.__schema);
     const slotSchema = shallowRef<SlotSchemaMap>();
@@ -57,6 +60,7 @@ export const Hoc = defineComponent({
       nodeSchema.value = newSchema;
       slotSchema.value = buildSchema(newSchema, node).slots;
     };
+
     const { rerender, rerenderRoot, rerenderParent } = useHocNode(() => {
       const newSchema = node ? exportSchema(node) : null;
       newSchema && updateSchema(newSchema);
@@ -141,7 +145,7 @@ export const Hoc = defineComponent({
       const scope = toRaw(props.__scope);
       const vnodeProps = { ...props.__vnodeProps };
       const compProps = splitLeafProps(attrs)[1];
-
+      console.log(vnodeProps, 'vnodeProps');
       if (isRootNode && !showNode.value) return null;
       const builtSlots = slotSchema.value
         ? buildSlots(slotSchema.value, scope, node)
@@ -149,7 +153,7 @@ export const Hoc = defineComponent({
       return comp
         ? isFragment(comp)
           ? h(Fragment, builtSlots.default?.())
-          : h(comp, { props: mergeProps(compProps, vnodeProps) }, builtSlots)
+          : h(comp, { props: compProps, ...vnodeProps }, builtSlots)
         : h('div', 'component not found');
     };
   },

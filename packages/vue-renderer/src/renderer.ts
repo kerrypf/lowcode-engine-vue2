@@ -125,6 +125,7 @@ const VueRenderer = defineComponent({
       thisRequiredInJSE: computed(() => props.thisRequiredInJSE),
       getNode: (id: string) => (props.getNode?.(id) as any) ?? null,
       triggerCompGetCtx: (schema: NodeSchema, inst: ComponentPublicInstance) => {
+        console.log('provide triggerCompGetCtx', inst);
         props.onCompGetCtx?.(schema, inst);
       },
       rerender: debounce(() => {

@@ -361,7 +361,10 @@ function createSimulatorRenderer() {
   };
   simulator.getComponent = (componentName) => components.value[componentName];
 
-  simulator.getClientRects = (element) => getClientRects(element);
+  simulator.getClientRects = (element) => {
+    console.log(getClientRects(element), 'getClientRects(element)');
+    return getClientRects(element);
+  };
   simulator.setNativeSelection = (enable) => setNativeSelection(enable);
   simulator.setDraggingState = (state) => cursor.setDragging(state);
   simulator.setCopyState = (state) => cursor.setCopy(state);

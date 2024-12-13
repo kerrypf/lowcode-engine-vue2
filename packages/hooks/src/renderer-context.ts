@@ -30,7 +30,8 @@ export function useRendererContext(): RendererContext {
     key,
     () => {
       //@ts-ignore
-      const props = getCurrentInstance()?.props ?? {};
+      const props = getCurrentInstance()?.$props ?? {};
+      console.log(props, 'inst:useRendererContext');
       return {
         rerender: () => void 0,
         thisRequiredInJSE: true,
@@ -51,5 +52,6 @@ function getPropValue<T>(
   key: string,
   defaultValue: T,
 ): T {
+  console.log(props, 'inst: getPropValue');
   return (props[key] || props[`__${key}`] || defaultValue) as T;
 }

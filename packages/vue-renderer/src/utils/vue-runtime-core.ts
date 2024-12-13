@@ -9,25 +9,26 @@ import {
   createTextVNode,
 } from 'vue';
 import { VNode } from 'vue';
+import { merge as mergeProps } from '@formily/shared';
 import { isPlainObject } from '@knxcloud/lowcode-utils';
 import Fragment from 'vue-frag';
 
-function cached<R>(fn: (str: string) => R): (sr: string) => R {
-  const cache: Record<string, R> = Object.create(null);
-  return function cachedFn(str: string) {
-    const hit = cache[str];
-    return hit || (cache[str] = fn(str));
-  };
-}
-const camelizeRE = /-(\w)/g;
-const camelize = cached((str: string): string => {
-  return str.replace(camelizeRE, (_, c) => (c ? c.toUpperCase() : ''));
-});
-function mergeProps(to, from) {
-  for (const key in from) {
-    to[camelize(key)] = from[key];
-  }
-}
+// function cached<R>(fn: (str: string) => R): (sr: string) => R {
+//   const cache: Record<string, R> = Object.create(null);
+//   return function cachedFn(str: string) {
+//     const hit = cache[str];
+//     return hit || (cache[str] = fn(str));
+//   };
+// }
+// const camelizeRE = /-(\w)/g;
+// const camelize = cached((str: string): string => {
+//   return str.replace(camelizeRE, (_, c) => (c ? c.toUpperCase() : ''));
+// });
+// function mergeProps(to, from) {
+//   for (const key in from) {
+//     to[camelize(key)] = from[key];
+//   }
+// }
 
 function isVNode(val: any): val is VNode {
   return val && isPlainObject(val) && Object.hasOwn(val, 'componentOptions');

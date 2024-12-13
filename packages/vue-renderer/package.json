@@ -20,6 +20,7 @@
     "prepack": "pnpm test && pnpm build"
   },
   "dependencies": {
+    "@formily/shared": "^2.3.2",
     "@formily/vue": "^2.3.2",
     "@knxcloud/lowcode-data-source": "workspace:*",
     "@knxcloud/lowcode-hooks": "workspace:*",

@@ -141,6 +141,9 @@ importers:
 
   packages/vue-renderer:
     dependencies:
+      '@formily/shared':
+        specifier: ^2.3.2
+        version: 2.3.2
       '@formily/vue':
         specifier: ^2.3.2
         version: 2.3.2(typescript@5.2.2)(vue@2.7.16)
