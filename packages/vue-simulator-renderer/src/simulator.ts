@@ -105,7 +105,7 @@ function createDocumentInstance(
   ) => {
     const instanceRecords = !instances
       ? null
-      : instances.map((inst) => createComponentRecord(docId, nodeId, inst.$.uid));
+      : instances.map((inst) => createComponentRecord(docId, nodeId, inst._uid));
     host.setInstance(docId, nodeId, instanceRecords);
   };
 
@@ -132,8 +132,8 @@ function createDocumentInstance(
 
     let el: CompRootHTMLElement;
     let instance: ComponentInstance;
-
-    if ('$' in instanceOrEl) {
+    console.log(instanceOrEl, 'instanceOrEl');
+    if (instanceOrEl.$el) {
       //@ts-ignore
       instance = instanceOrEl;
       //@ts-ignore@
@@ -153,7 +153,7 @@ function createDocumentInstance(
       unmountInstance(origId, instance);
     }
 
-    onUnmounted(() => unmountInstance(id, instance), instance.$);
+    onUnmounted(() => unmountInstance(id, instance), instance);
 
     setCompRootData(el, {
       nodeId: id,
@@ -173,7 +173,7 @@ function createDocumentInstance(
     } else {
       instances = [instance];
     }
-    vueInstanceMap.set(instance.$.uid, instance);
+    vueInstanceMap.set(instance._uid, instance);
     instancesMap.set(id, instances);
     setHostInstance(docId, id, instances);
   };
@@ -184,7 +184,7 @@ function createDocumentInstance(
       const i = instances.indexOf(instance);
       if (i > -1) {
         const [instance] = instances.splice(i, 1);
-        vueInstanceMap.delete(instance.$.uid);
+        vueInstanceMap.delete(instance._uid);
         setHostInstance(document.id, id, instances);
       }
     }
@@ -322,8 +322,28 @@ function createSimulatorRenderer() {
   //     simulator,
   //   },
   // });
+  console.log(router, 'router');
   simulator.app = markRaw(simulatorApp);
   simulator.router = markRaw(router);
+  simulator.router.hasRoute = (routeName) => {
+    const routes = router.getRoutes();
+    const routeExists = routes.some((route) => route.name === routeName);
+    return routeExists;
+  };
+  // simulator.router.removeRoute = (routeName) => {
+  //   // 获取当前的所有路由
+  //   const routes = router.getRoutes();
+
+  //   // 找到需要删除的路由
+  //   const routeToRemove = routes.find((route) => route.name === routeName);
+
+  //   if (routeToRemove) {
+  //     // 删除指定的路由
+  //     router.matcher.routes = router.matcher.routes.filter(
+  //       (route) => route !== routeToRemove,
+  //     );
+  //   }
+  // };
   simulator.getComponent = (componentName) => {
     const paths = componentName.split('.');
     const subs: string[] = [];
@@ -361,10 +381,7 @@ function createSimulatorRenderer() {
   };
   simulator.getComponent = (componentName) => components.value[componentName];
 
-  simulator.getClientRects = (element) => {
-    console.log(getClientRects(element), 'getClientRects(element)');
-    return getClientRects(element);
-  };
+  simulator.getClientRects = (element) => getClientRects(element);
   simulator.setNativeSelection = (enable) => setNativeSelection(enable);
   simulator.setDraggingState = (state) => cursor.setDragging(state);
   simulator.setCopyState = (state) => cursor.setCopy(state);
@@ -458,7 +475,12 @@ function createSimulatorRenderer() {
           documentInstance = createDocumentInstance(doc as any, context);
           documentInstanceMap.set(doc.id, documentInstance);
         } else if (router.hasRoute(documentInstance.id)) {
-          router.removeRoute(documentInstance.id);
+          const newRouter = new VueRouter.default({
+            mode: 'history',
+            routes: [],
+          });
+          router.matcher = newRouter.matcher;
+          // router.removeRoute(documentInstance.id);
         }
         router.addRoute({
           name: documentInstance.id,
@@ -479,7 +501,7 @@ function createSimulatorRenderer() {
         const id = route.name as string;
         const hasDoc = documentInstances.value.some((doc) => doc.id === id);
         if (!hasDoc) {
-          router.removeRoute(id);
+          // router.removeRoute(id);//TODO
           documentInstanceMap.delete(id);
         }
       });

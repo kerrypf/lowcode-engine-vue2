@@ -149,10 +149,7 @@ export default class UseLeaf {
       }
     }
     const ref = (inst: ComponentPublicInstance) => {
-      console.log(inst, 'inst');
-      const compCtx = this.renderContext.triggerCompGetCtx(schema, inst);
-      console.log(compCtx, 'inst:compCtx');
-      return compCtx;
+      this.renderContext.triggerCompGetCtx(schema, inst);
     };
     const node = id ? this.getNode(id) : null;
     const { props: rawProps, slots: rawSlots } = buildSchema(schema);
@@ -276,9 +273,9 @@ export default class UseLeaf {
       const field = schema;
       let lastInst: unknown = null;
       return (inst: unknown): void => {
-        let refs = scope.$.refs;
+        let refs = scope.$refs;
         if (Object.keys(refs).length === 0) {
-          refs = scope.$.refs = {};
+          refs = scope.$refs = {};
         }
         if (isNil(scope.__loopRefIndex)) {
           refs[field] = inst;

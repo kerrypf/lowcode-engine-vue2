@@ -34,7 +34,7 @@ export function getClosestNodeInstanceByElement(
         return {
           docId,
           nodeId,
-          instance: createComponentRecord(docId, nodeId, instance.$.uid),
+          instance: createComponentRecord(docId, nodeId, instance._uid),
         };
       }
     }
@@ -56,7 +56,7 @@ export function getClosestNodeInstanceByComponent(
         return {
           docId,
           nodeId,
-          instance: createComponentRecord(docId, nodeId, instance.$.uid),
+          instance: createComponentRecord(docId, nodeId, instance._uid),
         };
       }
     }

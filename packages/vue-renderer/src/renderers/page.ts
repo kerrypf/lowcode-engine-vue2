@@ -48,7 +48,6 @@ export const PageRenderer = defineComponent({
   setup(props, context) {
     const { scope } = useRootScope(props, context);
     const schemaRef = computed(() => props.__schema);
-
     const leafProps: LeafProps = {
       __comp: null,
       __scope: scope,

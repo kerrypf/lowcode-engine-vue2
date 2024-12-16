@@ -241,7 +241,6 @@ export function useLeaf(
   ): VNode | VNode[] | null => {
     // delete base._Ctor;
 
-    console.log(base, 'base111');
     // 若 schema 不为 NodeSchema，则直接渲染
     if (isString(schema)) {
       return createTextVNode(schema);
@@ -299,12 +298,9 @@ export function useLeaf(
 
     const { props: rawProps, slots: rawSlots } = buildSchema(schema);
     const { loop, buildLoopScope } = buildLoop(schema, scope);
-    console.log(rawProps, '-props-:rawProps');
     if (!loop) {
       const props = buildProps(rawProps, scope, node, null, { ref });
-      console.log(props, '-props-:buildProps');
       const [vnodeProps, compProps] = splitProps(props);
-      console.log(vnodeProps, compProps, '-props-:splitProps');
       return h(
         base,
         {
@@ -331,7 +327,6 @@ export function useLeaf(
       const props = buildProps(rawProps, scope, node, blockScope, { ref });
       const [vnodeProps, compProps] = splitProps(props);
       const mergedScope = mergeScope(scope, blockScope);
-      console.log('debouncedRerender-base-loop');
       return h(
         base,
         {
@@ -356,7 +351,6 @@ export function useLeaf(
    * @param comp - 节点渲染的组件，若不传入，则根据节点的 componentName 推断
    */
   const renderHoc: RenderComponent = (nodeSchema, blockScope, comp) => {
-    console.log('debouncedRerender-nodeSchema');
     const vnode = render(nodeSchema, Hoc, blockScope, comp);
     if (isNodeSchema(nodeSchema) && isVNode(vnode)) {
       if (vnode.type === Comment) {
@@ -528,9 +522,9 @@ export function useLeaf(
       const field = schema;
       let lastInst: unknown = null;
       return (inst: unknown): void => {
-        let refs = scope.$.refs;
+        let refs = scope.$refs;
         if (Object.keys(refs).length === 0) {
-          refs = scope.$.refs = {};
+          refs = scope.$refs = {};
         }
         if (isNil(scope.__loopRefIndex)) {
           refs[field] = inst;
@@ -700,7 +694,6 @@ export function useRootScope(rendererProps: RendererProps, setupConext: object) 
 
   // 将全局属性配置应用到 scope 中
   const instance = getCurrentInstance()!;
-  console.log(instance, 'getCurrentInstance');
   const scope = instance.proxy as RuntimeScope;
   scope.accessCache = {};
   scope.$ = {

@@ -22,10 +22,8 @@ const HOC_NODE_KEY: InjectionKey<{ rerenderSlots: () => void }> = Symbol('hocNod
 const useHocNode = (rerenderSlots: () => void) => {
   const { rerender } = useRendererContext();
   const parentNode = inject(HOC_NODE_KEY, null);
-  console.log(parentNode, 'parentNode');
 
   const debouncedRerender = debounce(rerenderSlots);
-  console.log(debouncedRerender, 'debouncedRerender');
 
   provide(HOC_NODE_KEY, {
     rerenderSlots: debouncedRerender,
@@ -51,7 +49,6 @@ export const Hoc = defineComponent({
   inheritAttrs: false,
   props: leafProps,
   setup(props, { slots, attrs }) {
-    console.log('debouncedRerender-Hoc');
     const showNode = shallowRef(true);
     const nodeSchema = shallowRef(props.__schema);
     const slotSchema = shallowRef<SlotSchemaMap>();
@@ -145,7 +142,6 @@ export const Hoc = defineComponent({
       const scope = toRaw(props.__scope);
       const vnodeProps = { ...props.__vnodeProps };
       const compProps = splitLeafProps(attrs)[1];
-      console.log(vnodeProps, 'vnodeProps');
       if (isRootNode && !showNode.value) return null;
       const builtSlots = slotSchema.value
         ? buildSlots(slotSchema.value, scope, node)
