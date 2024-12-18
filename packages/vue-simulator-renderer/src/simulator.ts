@@ -14,6 +14,7 @@ import Vue, {
   shallowReactive, //用于创建一个浅层响应式对象
 } from 'vue';
 import * as VueRouter from 'vue-router';
+console.log(Vue, 'Vue.createTextVNode');
 import type {
   ComponentInstance,
   ComponentRecord,
@@ -132,7 +133,6 @@ function createDocumentInstance(
 
     let el: CompRootHTMLElement;
     let instance: ComponentInstance;
-    console.log(instanceOrEl, 'instanceOrEl');
     if (instanceOrEl.$el) {
       //@ts-ignore
       instance = instanceOrEl;
@@ -322,7 +322,6 @@ function createSimulatorRenderer() {
   //     simulator,
   //   },
   // });
-  console.log(router, 'router');
   simulator.app = markRaw(simulatorApp);
   simulator.router = markRaw(router);
   simulator.router.hasRoute = (routeName) => {

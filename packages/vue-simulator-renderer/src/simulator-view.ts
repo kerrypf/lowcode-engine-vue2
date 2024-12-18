@@ -120,10 +120,7 @@ export const Renderer = defineComponent({
         disableCompMock: simulator.disableCompMock,
         thisRequiredInJSE: simulator.thisRequiredInJSE,
         getNode: (id) => documentInstance.getNode(id) as any,
-        onCompGetCtx: (schema, ref) => {
-          console.log(ref, 'refrefref');
-          return documentInstance.mountInstance(schema.id!, ref);
-        },
+        onCompGetCtx: (schema, ref) => documentInstance.mountInstance(schema.id!, ref),
       },
     });
   },

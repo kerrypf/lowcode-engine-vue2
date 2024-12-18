@@ -137,14 +137,25 @@ export default defineComponent({
       (newSchema) => updateSchema(newSchema),
     );
 
-    const comp = toRaw(props.__comp);
-    const scope = toRaw(props.__scope);
-    const vnodeProps = { ...props.__vnodeProps };
-    const compProps = splitLeafProps(attrs)[1];
-    const builtSlots = slotSchema.value
-      ? buildSlots(slotSchema.value, scope, node)
-      : slots;
-    // const hocProps = mergeProps(compProps, vnodeProps);
-    return () => h(comp, { ...vnodeProps, props: compProps }, builtSlots);
+    return () => {
+      const comp = toRaw(props.__comp);
+      const scope = toRaw(props.__scope);
+      const vnodeProps = { ...props.__vnodeProps };
+      const compProps = splitLeafProps(attrs)[1];
+      const builtSlots = slotSchema.value
+        ? buildSlots(slotSchema.value, scope, node)
+        : slots;
+
+      console.log(compProps, 'compProps');
+      return comp
+        ? isFragment(comp)
+          ? h(Fragment, builtSlots.default?.())
+          : h(
+              comp,
+              { ...vnodeProps, ...compProps, attrs: compProps, props: compProps },
+              builtSlots,
+            )
+        : h('div', 'component not found');
+    };
   },
 });

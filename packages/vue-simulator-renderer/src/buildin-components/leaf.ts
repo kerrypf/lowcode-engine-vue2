@@ -9,6 +9,7 @@ import { defineComponent } from 'vue';
 // });
 
 const Leaf = defineComponent({
+  name: 'Leaf',
   render() {
     return this.$slots.default;
   },

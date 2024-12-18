@@ -115,6 +115,23 @@ export default class UseLeaf {
     scope: RuntimeScope,
     comp?: Component | typeof Fragment,
   ): VNode | VNode[] | null => {
+    if (isString(schema)) {
+      console.log(schema, createTextVNode(schema), 'createTextVNode(schema)');
+      return schema;
+      // return createTextVNode(schema);
+    } else if (isNil(schema)) {
+      return null;
+    } else if (!isNodeSchema(schema)) {
+      const result = this.parser.parseSchema(schema, scope);
+      return toDisplayString(result);
+      // return createTextVNode(toDisplayString(result));
+    }
+
+    const { show, scene } = this.buildShow(schema, scope, this.isDesignMode);
+    if (!show) {
+      return createCommentVNode(`${scene} ${show}`);
+    }
+
     const { componentName, id, children } = schema;
     if (!comp) {
       comp = this.renderContext.components[componentName];
@@ -153,24 +170,55 @@ export default class UseLeaf {
     };
     const node = id ? this.getNode(id) : null;
     const { props: rawProps, slots: rawSlots } = buildSchema(schema);
-    const props = this.buildProps(rawProps, scope, node, null, { ref });
-    const [vnodeProps, compProps] = splitProps(props);
-    return h(
-      Hoc,
-      {
-        key: vnodeProps.key ?? id,
-        attrs: {
-          ...compProps,
+    const { loop, buildLoopScope } = this.buildLoop(schema, scope);
+    if (!loop) {
+      const props = this.buildProps(rawProps, scope, node, null, { ref });
+      const [vnodeProps, compProps] = splitProps(props);
+      return h(
+        Hoc,
+        {
+          key: vnodeProps.key ?? id,
+          attrs: {
+            ...compProps,
+          },
+          props: {
+            __comp: comp,
+            __scope: scope,
+            __schema: schema,
+            __vnodeProps: vnodeProps,
+          },
         },
-        props: {
-          __comp: comp,
-          __scope: scope,
-          __schema: schema,
-          __vnodeProps: vnodeProps,
+        this.buildSlots(rawSlots, scope, node),
+      );
+    }
+
+    if (!isArray(loop)) {
+      console.warn('循环对象必须是数组, type: ' + toString(loop));
+      return null;
+    }
+
+    return loop.map((item, index, arr) => {
+      const blockScope = buildLoopScope(item, index, arr.length);
+      const props = this.buildProps(rawProps, scope, node, blockScope, { ref });
+      const [vnodeProps, compProps] = splitProps(props);
+      const mergedScope = mergeScope(scope, blockScope);
+      return h(
+        Hoc,
+        {
+          key: vnodeProps.key ?? `${id}--${index}`,
+          attrs: {
+            ...compProps,
+          },
+          props: {
+            __comp: comp,
+            __scope: mergedScope,
+            __schema: schema,
+            __vnodeProps: vnodeProps,
+          },
         },
-      },
-      this.buildSlots(rawSlots, scope, node),
-    );
+        this.buildSlots(rawSlots, mergedScope, node),
+      );
+    });
   };
   buildSlots = (
     slots: SlotSchemaMap,
@@ -180,9 +228,11 @@ export default class UseLeaf {
     return Object.keys(slots).reduce(
       (prev, next) => {
         let slotSchema = slots[next];
+        console.log(slotSchema, 'slotSchema');
         const isDefaultSlot = next === 'default';
 
         // 插槽数据为 null 或 undefined 时不渲染插槽
+        console.log(isNil(slotSchema), isDefaultSlot, 'slotSchema');
         if (isNil(slotSchema) && !isDefaultSlot) return prev;
 
         // 默认插槽内容为空，且当前节点不是容器节点时，不渲染默认插槽
@@ -219,6 +269,7 @@ export default class UseLeaf {
             (schema) => () => ensureArray(this.render(schema, scope)),
           );
         }
+        console.log('renderSlot', renderSlot, isDefaultSlot, node?.isContainerNode);
         prev[next] =
           isDefaultSlot && node?.isContainerNode
             ? decorateDefaultSlot(renderSlot, this.locked) // 当节点为容器节点，且为设计模式下，则装饰默认插槽
@@ -307,9 +358,9 @@ export default class UseLeaf {
         lastInst = inst;
       };
     } else {
-      const propValue = buildNormalProp(schema, scope, blockScope, path, node);
+      const propValue = this.buildNormalProp(schema, scope, blockScope, path, node);
       return isString(propValue)
-        ? buildRefProp(propValue, scope, blockScope, path, node)
+        ? this.buildRefProp(propValue, scope, blockScope, path, node)
         : propValue;
     }
   };
@@ -323,9 +374,9 @@ export default class UseLeaf {
     const prop = path ? node?.getProp(path, false) : null;
     if (isJSExpression(schema) || isJSFunction(schema)) {
       // 处理表达式和函数
-      return parser.parseExpression(schema, scope);
+      return this.parser.parseExpression(schema, scope);
     } else if (isI18nData(schema)) {
-      return parser.parseI18n(schema, scope);
+      return this.parser.parseI18n(schema, scope);
     } else if (isJSSlot(schema)) {
       // 处理属性插槽
       let slotParams: string[];
@@ -342,10 +393,10 @@ export default class UseLeaf {
 
       // 返回 slot 函数
       return (...args: unknown[]) => {
-        const slotScope = parser.parseSlotScope(args, slotParams);
+        const slotScope = this.parser.parseSlotScope(args, slotParams);
         const vnodes: VNode[] = [];
         ensureArray(slotSchema).forEach((item) => {
-          const vnode = renderComp(item, mergeScope(scope, blockScope, slotScope));
+          const vnode = this.render(item, mergeScope(scope, blockScope, slotScope));
           ensureArray(vnode).forEach((item) => vnodes.push(item));
         });
         return vnodes;
@@ -353,7 +404,7 @@ export default class UseLeaf {
     } else if (isArray(schema)) {
       // 属性值为 array，递归处理属性的每一项
       return schema.map((item, idx) =>
-        buildNormalProp(item, scope, blockScope, `${path}.${idx}`, node),
+        this.buildNormalProp(item, scope, blockScope, `${path}.${idx}`, node),
       );
     } else if (schema && isObject(schema)) {
       // 属性值为 object，递归处理属性的每一项
@@ -361,16 +412,61 @@ export default class UseLeaf {
       Object.keys(schema).forEach((key) => {
         if (key.startsWith('__')) return;
         const val = schema[key];
-        res[key] = buildNormalProp(val, scope, blockScope, `${path}.${key}`, node);
+        res[key] = this.buildNormalProp(val, scope, blockScope, `${path}.${key}`, node);
       });
       return res;
     }
     return schema;
   };
+  buildLoop = (schema: NodeSchema, scope: RuntimeScope) => {
+    let loop: CompositeValue | null = null;
+    const loopArgs = ['item', 'index'];
+
+    if (schema.loop) loop = schema.loop;
+    if (schema.loopArgs) {
+      schema.loopArgs.forEach((v, i) => {
+        v != null && v !== '' && (loopArgs[i] = v);
+      });
+    }
+
+    return {
+      loop: loop ? this.parser.parseSchema(loop, scope) : null,
+      loopArgs,
+      buildLoopScope(item, index, len): BlockScope {
+        const offset = scope.__loopRefOffset ?? 0;
+        const [itemKey, indexKey] = loopArgs;
+        return {
+          [itemKey]: item,
+          [indexKey]: index,
+          __loopScope: true,
+          __loopRefIndex: offset + index,
+          __loopRefOffset: len * index,
+        };
+      },
+    } as {
+      loop: unknown;
+      loopArgs: [string, string];
+      buildLoopScope(item: unknown, index: number, len: number): BlockScope;
+    };
+  };
+  buildShow = (schema: NodeSchema, scope: RuntimeScope, isDesignMode: boolean) => {
+    const hidden = isDesignMode ? schema.hidden ?? false : false;
+    const condition = schema.condition ?? true;
+
+    if (hidden) return { scene: 'hidden', show: false };
+    return {
+      scene: 'condition',
+      show:
+        typeof condition === 'boolean'
+          ? condition
+          : !!this.parser.parseSchema(condition, scope),
+    };
+  };
 }
 const decorateDefaultSlot = (slot: Slot, locked: Ref<boolean>): Slot => {
   return (...args: unknown[]) => {
     const vnodes = slot(...args).filter(Boolean);
+    console.log(vnodes, 'vnodes');
     if (!vnodes.length) {
       const isLocked = locked.value;
       const className = {
