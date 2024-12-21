@@ -1,6 +1,7 @@
-import type { ExtractDefaultPropTypes, ExtractPropTypes } from 'vue';
+//@ts-nocheck
+/* eslint-disable */
+import type { ExtractDefaultPropTypes, ExtractPropTypes, VNode } from 'vue';
 import { IfAny } from 'vue/types/common';
-import { VNode } from './vue-runtime-core';
 export type ExtractPublicPropTypes<T> = Omit<
   ExtractPropTypes<T>,
   keyof ExtractDefaultPropTypes<T>

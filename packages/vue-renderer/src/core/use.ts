@@ -1,4 +1,4 @@
-//@ts-ignore
+//@ts-nocheck
 import {
   type Component,
   type VNode,

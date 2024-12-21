@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { Suspense, Teleport, Comment, withCtx } from 'vue';
 import Vue, { VNode, defineComponent } from 'vue';
 import { merge as mergeProps } from '@formily/shared';

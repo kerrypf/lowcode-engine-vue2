@@ -18,7 +18,6 @@ import { leafProps } from './base';
 import { useRendererContext } from '@knxcloud/lowcode-hooks';
 import type { IPublicTypeNodeSchema } from '@alilc/lowcode-types';
 import { debounce, exportSchema, isJSSlot } from '@knxcloud/lowcode-utils';
-
 const HOC_NODE_KEY: InjectionKey<{ rerenderSlots: () => void }> = Symbol('hocNode');
 const useHocNode = (rerenderSlots: () => void) => {
   const { rerender } = useRendererContext();
@@ -49,7 +48,7 @@ export default defineComponent({
   inheritAttrs: false,
   props: leafProps,
   setup(props, { slots, attrs }) {
-    // return;
+    console.log('useLeaf');
     const showNode = shallowRef(true);
     const nodeSchema = shallowRef(props.__schema);
     const slotSchema = shallowRef<SlotSchemaMap>();

@@ -6,8 +6,11 @@ import { isPromise } from '@knxcloud/lowcode-utils';
 import { useRenderer, rendererProps, useRootScope } from '../core';
 import { type LeafProps } from '../core/base';
 
-const Page = defineComponent((props, { slots }) => {
-  return () => h('div', { class: 'lc-page', style: { height: '100%' }, props }, slots);
+const Page = defineComponent({
+  setup(props, { slots }) {
+    console.log(props, 'comp1111 propsPage');
+    return () => h('div', { class: 'lc-page', style: { height: '100%' }, props }, slots);
+  },
 });
 
 // export const PageRenderer1 = defineComponent({

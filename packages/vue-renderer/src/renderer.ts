@@ -220,7 +220,7 @@ const VueRenderer = defineComponent({
           )
         : null;
     };
-
+    console.log('Vuerander');
     return () => {
       const { device, locale } = props;
       const configProvider = config.getConfigProvider();

@@ -65,6 +65,7 @@ import {
 import { type LeafProps, leafProps } from './base';
 import { buildSchema, isFragment, splitLeafProps, type SlotSchemaMap } from './use';
 import Hoc from './hoc';
+import { Live } from './leaf/live';
 const IS_LOCKED: InjectionKey<Ref<boolean>> = Symbol('IS_LOCKED');
 const IS_ROOT_NODE: InjectionKey<boolean> = Symbol('IS_ROOT_NODE');
 const keepParam = <T, R>(param: T, cb: (param: T) => R) => {
@@ -115,6 +116,7 @@ export default class UseLeaf {
     scope: RuntimeScope,
     comp?: Component | typeof Fragment,
   ): VNode | VNode[] | null => {
+    console.log(schema, 'schema');
     if (isString(schema)) {
       console.log(schema, createTextVNode(schema), 'createTextVNode(schema)');
       return schema;
@@ -174,8 +176,9 @@ export default class UseLeaf {
     if (!loop) {
       const props = this.buildProps(rawProps, scope, node, null, { ref });
       const [vnodeProps, compProps] = splitProps(props);
+      console.log('comp1111 render', comp);
       return h(
-        Hoc,
+        this.isDesignMode ? Hoc : Live,
         {
           key: vnodeProps.key ?? id,
           attrs: {
