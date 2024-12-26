@@ -160,6 +160,7 @@ export class SchemaParser {
       contextArr.push('return ');
       tarStr = contextArr.join('\n') + tarStr;
       const fn = this.createFunction(tarStr);
+      console.log(fn, 'compProps render parseExpression', tarStr, scope, this.exports);
       return fn(this.exports, scope || {});
     } catch (err) {
       console.warn('parseExpression.error', err, str, self);

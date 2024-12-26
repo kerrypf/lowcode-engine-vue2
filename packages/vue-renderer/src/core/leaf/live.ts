@@ -13,16 +13,36 @@ export const Live = defineComponent({
       const comp = toRaw(props.__comp);
       const vnodeProps = { ...props.__vnodeProps };
       const compProps = splitLeafProps(attrs)[1];
-      console.log(comp, 'comp1111', isFragment(comp));
       if (isFragment(comp)) {
         // return renderSlot(slots, 'default', attrs);
         return slots.default?.(attrs);
       }
 
+      const events = Object.keys(compProps).reduce((r, c) => {
+        if (compProps[c] && c.startsWith('on') && typeof compProps[c] === 'function') {
+          r[c] = compProps[c].bind(props.__scope);
+          const ext = c.replace('on', '');
+          if (ext && ext[0]) {
+            r[ext[0].toLocaleLowerCase() + ext.substring(1)] = compProps[c].bind(
+              props.__scope,
+            );
+            // r[c.replace('on', 'on-')] = compProps[c];
+          }
+        }
+
+        return r;
+      }, {});
+      console.log(events, compProps, 'compProps comp1111123');
       return comp
         ? h(
             comp,
-            { ...vnodeProps, ...compProps, attrs: compProps, props: compProps },
+            {
+              ...vnodeProps,
+              ...compProps,
+              attrs: compProps,
+              props: compProps,
+              on: events,
+            },
             slots,
           )
         : null;

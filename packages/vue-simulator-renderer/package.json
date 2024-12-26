@@ -19,10 +19,16 @@
     "prepack": "pnpm build"
   },
   "dependencies": {
+    "@fc/request": "^1.1.2",
     "@formily/vue": "^2.3.2",
+    "@im/colors": "^0.1.27",
+    "@im/lowcode-material": "^0.0.40-beta.0",
+    "@im/lowcode-shared": "^0.0.26",
+    "@im/ui": "^0.1.27",
     "@knxcloud/lowcode-hooks": "workspace:*",
     "@knxcloud/lowcode-utils": "workspace:*",
-    "@knxcloud/lowcode-vue-renderer": "workspace:*"
+    "@knxcloud/lowcode-vue-renderer": "workspace:*",
+    "h_ui": "^1.74.0"
   },
   "devDependencies": {
     "@alilc/lowcode-designer": "^1.1.10",

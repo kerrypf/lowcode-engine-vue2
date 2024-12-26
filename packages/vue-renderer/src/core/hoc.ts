@@ -145,7 +145,7 @@ export default defineComponent({
         ? buildSlots(slotSchema.value, scope, node)
         : slots;
 
-      console.log(compProps, 'compProps');
+      console.log(comp, 'propsForm', compProps, isFragment(comp));
       return comp
         ? isFragment(comp)
           ? h(Fragment, builtSlots.default?.())

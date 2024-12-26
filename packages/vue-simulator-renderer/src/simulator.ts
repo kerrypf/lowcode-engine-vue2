@@ -14,7 +14,6 @@ import Vue, {
   shallowReactive, //用于创建一个浅层响应式对象
 } from 'vue';
 import * as VueRouter from 'vue-router';
-console.log(Vue, 'Vue.createTextVNode');
 import type {
   ComponentInstance,
   ComponentRecord,
@@ -38,7 +37,7 @@ import {
   isArray,
 } from '@knxcloud/lowcode-utils';
 import { Renderer, SimulatorRendererView } from './simulator-view';
-import { Slot, Leaf, Page } from './buildin-components';
+import { Slot, Leaf, Page, FcForm } from './buildin-components';
 import { host } from './host';
 import {
   cursor,
@@ -61,7 +60,7 @@ Object.assign(window, { VueRouter });
 
 const loader = new AssetLoader();
 
-const builtinComponents = { Slot, Leaf, Page };
+const builtinComponents = { Slot, Leaf, Page, FcForm };
 
 export interface ProjectContext {
   i18n: Record<string, object>;
@@ -481,6 +480,7 @@ function createSimulatorRenderer() {
           router.matcher = newRouter.matcher;
           // router.removeRoute(documentInstance.id);
         }
+        console.log('simulator', simulator);
         router.addRoute({
           name: documentInstance.id,
           path: documentInstance.path,
